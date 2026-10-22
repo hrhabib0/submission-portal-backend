@@ -1,0 +1,28 @@
+node_modules
+node_modules/
+dist/
+.next/
+out/
+coverage/
+
+.env
+.env.*
+!.env.example
+
+*.log
+.DS_Store
+
+# Extra files
+.agents
+.claude
+.cursor
+.devin
+
+# Lock Files
+pnpm-lock.yaml
+yarn.lock
+package-lock.json
+skills-lock.json
+pnpm-workspace.yaml
+.vscode
+.vercel
