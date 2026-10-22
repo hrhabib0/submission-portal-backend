@@ -1,0 +1,14 @@
+model Feedback {
+    id           String   @id @default(uuid())
+    submissionId String
+    mentorId     String
+    comment      String   @db.Text
+    createdAt    DateTime @default(now())
+
+    submission Submission @relation(fields: [submissionId], references: [id], onDelete: Restrict)
+    mentor     User       @relation("MentorFeedback", fields: [mentorId], references: [id], onDelete: Restrict)
+
+    @@index([submissionId, createdAt])
+    @@index([mentorId])
+    @@map("feedbacks")
+}
