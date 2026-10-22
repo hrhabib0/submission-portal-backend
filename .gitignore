@@ -17,6 +17,7 @@ coverage/
 .claude
 .cursor
 .devin
+.windsurf
 
 # Lock Files
 pnpm-lock.yaml
@@ -26,3 +27,6 @@ skills-lock.json
 pnpm-workspace.yaml
 .vscode
 .vercel
+
+generated
+/generated/prisma
