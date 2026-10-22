@@ -10,6 +10,7 @@ import { SignOptions } from "jsonwebtoken";
 const registerUser = async (payload: IRegisterUserPayload) => {
     const { name, email, password } = payload;
 
+    // step 1: check if user already exists
     const existingUser = await prisma.user.findUnique({
         where: {
             email,
@@ -17,9 +18,10 @@ const registerUser = async (payload: IRegisterUserPayload) => {
     });
 
     if (existingUser) {
-        throw new Error("User with this email already exists.");
+        throw new AppError(httpStatus.CONFLICT, "User with this email already exists.");
     }
 
+    // step 2: hash the password and create the user
     const hashedPassword = await bcrypt.hash(password, Number(config.bcrypt_salt_rounds));
 
     const user = await prisma.user.create({
@@ -34,6 +36,8 @@ const registerUser = async (payload: IRegisterUserPayload) => {
             email: true,
         },
     });
+
+    // step 3: return the created user
     return { user };
 }
 

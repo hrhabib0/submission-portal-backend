@@ -3,6 +3,7 @@ import cors from "cors";
 import express from "express";
 import helmet from "helmet";
 import { AuthRoutes } from "./app/modules/auth/auth.route.js";
+import { globalErrorHandler } from "./app/middleware/globalErrorHandler.js";
 
 const app = express();
 
@@ -27,5 +28,7 @@ app.get("/", (_req, res) => {
         message: "Project Submission API is running",
     });
 });
+
+app.use(globalErrorHandler);
 
 export default app;
