@@ -57,6 +57,23 @@ const createSubmission = async (
     }
 };
 
+const getAllSubmissions = async () => {
+    const submissions = await prisma.submission.findMany({
+        select: {
+            id: true,
+            studentId: true,
+            projectName: true,
+            repoUrl: true,
+            liveUrl: true,
+            description: true,
+            status: true,
+            createdAt: true,
+            updatedAt: true,
+        },
+    });
+    return { submissions };
+};
+
 const getMySubmissions = async (studentId: string) => {
     const submissions = await prisma.submission.findMany({
         where: { studentId },
@@ -76,5 +93,6 @@ const getMySubmissions = async (studentId: string) => {
 
 export const SubmissionServices = {
     createSubmission,
+    getAllSubmissions,
     getMySubmissions,
 };

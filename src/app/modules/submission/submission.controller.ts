@@ -26,6 +26,16 @@ const createSubmission = catchAsync(async (req: Request, res: Response) => {
     });
 })
 
+const getAllSubmissions = catchAsync(async (req: Request, res: Response) => {
+    const result = await SubmissionServices.getAllSubmissions();
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: "All submissions retrieved successfully",
+        data: result,
+    });
+});
+
 const getMySubmissions = catchAsync(async (req: Request, res: Response) => {
     const userId = req.user?.userId as string;
     const result = await SubmissionServices.getMySubmissions(userId);
@@ -41,5 +51,6 @@ const getMySubmissions = catchAsync(async (req: Request, res: Response) => {
 
 export const SubmissionController = {
     createSubmission,
+    getAllSubmissions,
     getMySubmissions,
 }

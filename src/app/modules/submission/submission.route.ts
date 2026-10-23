@@ -16,6 +16,11 @@ router.post(
     SubmissionController.createSubmission
 )
 router.get(
+    "/",
+    auth(Role.MENTOR, Role.ADMIN),
+    SubmissionController.getAllSubmissions
+)
+router.get(
     "/my-submissions",
     auth(Role.STUDENT),
     SubmissionController.getMySubmissions

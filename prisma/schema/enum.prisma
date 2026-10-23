@@ -1,6 +1,7 @@
 enum Role {
   STUDENT
   MENTOR
+  ADMIN
 }
 
 enum SubmissionStatus {
