@@ -12,12 +12,12 @@ const router = Router();
 router.post(
     "/",
     auth(Role.STUDENT),
-    validateRequest(submissionValidation.createSubmissionSchema),
     SubmissionController.createSubmission
 )
 router.get(
     "/",
     auth(Role.MENTOR, Role.ADMIN),
+    validateRequest(submissionValidation.submissionQuerySchema),
     SubmissionController.getAllSubmissions
 )
 router.get(

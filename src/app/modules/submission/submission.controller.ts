@@ -4,6 +4,8 @@ import { SubmissionServices } from "./submission.service.js";
 import { sendResponse } from "../../utils/sendResponse.js";
 import httpStatus from "http-status";
 import { AppError } from "../../errors/AppError.js";
+import { ISubmissionListQuery } from "./submission.interface.js";
+import { submissionValidation } from "./submission.validation.js";
 
 
 const createSubmission = catchAsync(async (req: Request, res: Response) => {
@@ -27,7 +29,9 @@ const createSubmission = catchAsync(async (req: Request, res: Response) => {
 })
 
 const getAllSubmissions = catchAsync(async (req: Request, res: Response) => {
-    const result = await SubmissionServices.getAllSubmissions();
+    const query = submissionValidation.submissionQuerySchema.parse(req.query);
+    const result = await SubmissionServices.getAllSubmissions(query);
+
     sendResponse(res, {
         success: true,
         statusCode: httpStatus.OK,

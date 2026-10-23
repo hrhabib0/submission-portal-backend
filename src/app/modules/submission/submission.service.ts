@@ -1,7 +1,7 @@
 import { Prisma } from "../../../generated/prisma/client.js";
 import { AppError } from "../../errors/AppError.js";
 import { prisma } from "../../lib/prisma.js";
-import { ICreateSubmissionPayload } from "./submission.interface.js";
+import { ICreateSubmissionPayload, ISubmissionListQuery } from "./submission.interface.js";
 import httpStatus from "http-status";
 
 
@@ -57,37 +57,88 @@ const createSubmission = async (
     }
 };
 
-const getAllSubmissions = async () => {
-    const submissions = await prisma.submission.findMany({
-        select: {
-            id: true,
-            studentId: true,
-            projectName: true,
-            repoUrl: true,
-            liveUrl: true,
-            description: true,
-            status: true,
-            createdAt: true,
-            updatedAt: true,
+const getAllSubmissions = async (query: ISubmissionListQuery) => {
+
+    const page = query.page ?? 1;
+    const limit = query.limit ?? 10;
+    const status = query.status;
+    const skip = (page - 1) * limit;
+
+    const where: Prisma.SubmissionWhereInput = status ? { status } : {};
+
+    const [submissions, total] = await prisma.$transaction([
+        prisma.submission.findMany({
+            where,
+            skip,
+            take: limit,
+            orderBy: { createdAt: "desc" },
+            include: {
+                student: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                    },
+                },
+                feedback: {
+                    orderBy: { createdAt: "desc" },
+                    select: {
+                        id: true,
+                        comment: true,
+                        createdAt: true,
+                        mentor: {
+                            select: {
+                                id: true,
+                                name: true,
+                            },
+                        },
+                    },
+                },
+            },
+        }),
+        prisma.submission.count({ where }),
+    ]);
+    return {
+        data: submissions,
+        meta: {
+            page,
+            limit,
+            total,
+            totalPages: Math.ceil(total / limit),
         },
-    });
-    return { submissions };
+    };
 };
 
 const getMySubmissions = async (studentId: string) => {
     const submissions = await prisma.submission.findMany({
         where: { studentId },
-        select: {
-            id: true,
-            projectName: true,
-            repoUrl: true,
-            liveUrl: true,
-            description: true,
-            status: true,
-            createdAt: true,
-            updatedAt: true,
+        include: {
+            feedback: {
+                orderBy: {
+                    createdAt: "desc"
+                },
+                select: {
+                    id: true,
+                    comment: true,
+                    createdAt: true,
+                    mentor: {
+                        select: {
+                            id: true,
+                            name: true,
+                        },
+                    },
+                },
+            },
         },
     });
+
+    if (!submissions) {
+        throw new AppError(
+            httpStatus.NOT_FOUND,
+            "You have not submitted a project yet",
+        );
+    }
+
     return { submissions };
 };
 

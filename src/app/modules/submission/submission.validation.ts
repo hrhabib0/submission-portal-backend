@@ -32,7 +32,13 @@ const createSubmissionSchema = z.object({
         .max(2000, "Description cannot exceed 2000 characters"),
 });
 
+const submissionQuerySchema = z.object({
+    page: z.coerce.number().int().min(1).default(1),
+    limit: z.coerce.number().int().min(1).max(100).default(10),
+    status: z.enum(["PENDING", "APPROVED", "REJECTED"]).optional()
+});
 
 export const submissionValidation = {
     createSubmissionSchema,
+    submissionQuerySchema,
 }
