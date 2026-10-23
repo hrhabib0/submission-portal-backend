@@ -4,8 +4,8 @@ import { AppError } from "../errors/AppError.js";
 import httpStatus from "http-status";
 
 
-export const validateRequest = (zodSchema: z.ZodObject) => {
-    return catchAsync(async (req, res, next) => {
+export const validateRequest = (zodSchema: z.ZodType) => {
+    return catchAsync(async (req, _res, next) => {
         const payload = req.body ? req.body : {};
 
         const result = zodSchema.safeParse(payload);
@@ -18,5 +18,5 @@ export const validateRequest = (zodSchema: z.ZodObject) => {
         req.body = result.data;
 
         next();
-    })
-}
+    });
+};

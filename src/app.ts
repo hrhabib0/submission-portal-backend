@@ -2,10 +2,13 @@
 import cors from "cors";
 import express from "express";
 import helmet from "helmet";
+import cookieParser from "cookie-parser";
 import { AuthRoutes } from "./app/modules/auth/auth.route.js";
 import { globalErrorHandler } from "./app/middleware/globalErrorHandler.js";
+import { SubmissionRoutes } from "./app/modules/submission/submission.route.js";
 
 const app = express();
+app.use(cookieParser());
 
 app.use(helmet());
 
@@ -16,11 +19,13 @@ app.use(
     }),
 );
 
+app.use(cookieParser());
 app.use(express.json());
 
 
 // modules route
 app.use("/api/auth", AuthRoutes);
+app.use("/api/submission", SubmissionRoutes);
 
 app.get("/", (_req, res) => {
     res.status(200).json({
