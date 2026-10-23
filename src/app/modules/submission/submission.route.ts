@@ -25,7 +25,11 @@ router.get(
     auth(Role.STUDENT),
     SubmissionController.getMySubmissions
 )
-
+router.get(
+    "/stats",
+    auth(Role.MENTOR, Role.ADMIN),
+    SubmissionController.getSubmissionStats,
+);
 router.patch(
     "/:submissionId/review",
     auth(Role.MENTOR, Role.ADMIN),

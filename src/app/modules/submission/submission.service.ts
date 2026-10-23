@@ -1,4 +1,4 @@
-import { Prisma } from "../../../generated/prisma/client.js";
+import { Prisma, SubmissionStatus } from "../../../generated/prisma/client.js";
 import { AppError } from "../../errors/AppError.js";
 import { prisma } from "../../lib/prisma.js";
 import { ICreateSubmissionPayload, IReviewSubmissionPayload, ISubmissionListQuery } from "./submission.interface.js";
@@ -229,9 +229,34 @@ const reviewSubmission = async (
     return updatedSubmission;
 };
 
+const getSubmissionStats = async () => {
+    const groupedStatuses = await prisma.submission.groupBy({
+        by: ["status"],
+        _count: { _all: true },
+    });
+
+    const counts: Record<SubmissionStatus, number> = {
+        PENDING: 0,
+        APPROVED: 0,
+        REJECTED: 0,
+    };
+
+    for (const item of groupedStatuses) {
+        counts[item.status] = item._count._all;
+    }
+
+    return {
+        total: counts.PENDING + counts.APPROVED + counts.REJECTED,
+        pending: counts.PENDING,
+        approved: counts.APPROVED,
+        rejected: counts.REJECTED,
+    };
+};
+
 export const SubmissionServices = {
     createSubmission,
     getAllSubmissions,
     getMySubmissions,
     reviewSubmission,
+    getSubmissionStats,
 };
