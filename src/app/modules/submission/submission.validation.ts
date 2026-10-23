@@ -38,7 +38,17 @@ const submissionQuerySchema = z.object({
     status: z.enum(["PENDING", "APPROVED", "REJECTED"]).optional()
 });
 
+const reviewSubmissionSchema = z.object({
+    status: z.enum(["APPROVED", "REJECTED"]),
+    comment: z
+        .string()
+        .trim()
+        .min(3, "Review comment must be at least 3 characters")
+        .max(1000, "Review comment cannot exceed 1000 characters"),
+});
+
 export const submissionValidation = {
     createSubmissionSchema,
     submissionQuerySchema,
+    reviewSubmissionSchema,
 }

@@ -1,7 +1,7 @@
 import { Prisma } from "../../../generated/prisma/client.js";
 import { AppError } from "../../errors/AppError.js";
 import { prisma } from "../../lib/prisma.js";
-import { ICreateSubmissionPayload, ISubmissionListQuery } from "./submission.interface.js";
+import { ICreateSubmissionPayload, IReviewSubmissionPayload, ISubmissionListQuery } from "./submission.interface.js";
 import httpStatus from "http-status";
 
 
@@ -142,8 +142,96 @@ const getMySubmissions = async (studentId: string) => {
     return { submissions };
 };
 
+const reviewSubmission = async (
+    submissionId: string,
+    mentorId: string,
+    payload: IReviewSubmissionPayload,
+) => {
+    const existingSubmission = await prisma.submission.findUnique({
+        where: { id: submissionId },
+        select: {
+            id: true,
+            status: true,
+        },
+    });
+
+    if (!existingSubmission) {
+        throw new AppError(
+            httpStatus.NOT_FOUND,
+            "Submission not found",
+        );
+    }
+
+    if (existingSubmission.status !== "PENDING") {
+        throw new AppError(
+            httpStatus.CONFLICT,
+            "Only pending submissions can be reviewed",
+        );
+    }
+
+    // Update status and save mentor feedback.
+    const updatedSubmission = prisma.$transaction(async (tx) => {
+        const updateResult = await tx.submission.updateMany({
+            where: {
+                id: submissionId,
+                status: "PENDING",
+            },
+            data: {
+                status: payload.status,
+            },
+        });
+
+        // Prevent two mentors from reviewing the same pending submission
+        // simultaneously.
+        if (updateResult.count === 0) {
+            throw new AppError(
+                httpStatus.CONFLICT,
+                "This submission has already been reviewed",
+            );
+        }
+
+        await tx.feedback.create({
+            data: {
+                submissionId,
+                mentorId,
+                comment: payload.comment,
+            },
+        });
+
+        return tx.submission.findUniqueOrThrow({
+            where: { id: submissionId },
+            include: {
+                student: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                    },
+                },
+                feedback: {
+                    orderBy: { createdAt: "desc" },
+                    take: 1,
+                    select: {
+                        id: true,
+                        comment: true,
+                        createdAt: true,
+                        mentor: {
+                            select: {
+                                id: true,
+                                name: true,
+                            },
+                        },
+                    },
+                },
+            },
+        });
+    });
+    return updatedSubmission;
+};
+
 export const SubmissionServices = {
     createSubmission,
     getAllSubmissions,
     getMySubmissions,
+    reviewSubmission,
 };

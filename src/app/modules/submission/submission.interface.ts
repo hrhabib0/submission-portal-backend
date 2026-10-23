@@ -12,3 +12,8 @@ export interface ISubmissionListQuery {
     limit: number;
     status?: SubmissionStatus;
 }
+
+export interface IReviewSubmissionPayload {
+    status: "APPROVED" | "REJECTED";
+    comment: string;
+}

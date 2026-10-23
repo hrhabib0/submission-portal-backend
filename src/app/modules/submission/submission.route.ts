@@ -26,5 +26,12 @@ router.get(
     SubmissionController.getMySubmissions
 )
 
+router.patch(
+    "/:submissionId/review",
+    auth(Role.MENTOR, Role.ADMIN),
+    validateRequest(submissionValidation.reviewSubmissionSchema),
+    SubmissionController.reviewSubmission,
+);
+
 
 export const SubmissionRoutes = router;

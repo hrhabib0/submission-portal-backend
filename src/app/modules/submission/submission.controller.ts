@@ -4,7 +4,6 @@ import { SubmissionServices } from "./submission.service.js";
 import { sendResponse } from "../../utils/sendResponse.js";
 import httpStatus from "http-status";
 import { AppError } from "../../errors/AppError.js";
-import { ISubmissionListQuery } from "./submission.interface.js";
 import { submissionValidation } from "./submission.validation.js";
 
 
@@ -52,9 +51,31 @@ const getMySubmissions = catchAsync(async (req: Request, res: Response) => {
     });
 })
 
+const reviewSubmission = catchAsync(
+    async (req: Request, res: Response) => {
+        const submissionId = req.params.submissionId as string;
+        const mentorId = req.user?.userId as string;
+        const payload = req.body;
+
+        const result = await SubmissionServices.reviewSubmission(
+            submissionId,
+            mentorId,
+            payload,
+        );
+
+        sendResponse(res, {
+            success: true,
+            statusCode: httpStatus.OK,
+            message: `Submission ${payload.status.toLowerCase()} successfully`,
+            data: result,
+        });
+    },
+);
+
 
 export const SubmissionController = {
     createSubmission,
     getAllSubmissions,
     getMySubmissions,
+    reviewSubmission,
 }
