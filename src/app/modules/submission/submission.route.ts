@@ -15,7 +15,11 @@ router.post(
     validateRequest(submissionValidation.createSubmissionSchema),
     SubmissionController.createSubmission
 )
-
+router.get(
+    "/my-submissions",
+    auth(Role.STUDENT),
+    SubmissionController.getMySubmissions
+)
 
 
 export const SubmissionRoutes = router;

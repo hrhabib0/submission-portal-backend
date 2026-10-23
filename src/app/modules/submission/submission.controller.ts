@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { catchAsync } from "../../utils/catchAsync.js";
-import { submissionServices } from "./submission.service.js";
+import { SubmissionServices } from "./submission.service.js";
 import { sendResponse } from "../../utils/sendResponse.js";
 import httpStatus from "http-status";
 import { AppError } from "../../errors/AppError.js";
@@ -16,7 +16,7 @@ const createSubmission = catchAsync(async (req: Request, res: Response) => {
         );
     }
 
-    const result = await submissionServices.createSubmission(userId, req.body);
+    const result = await SubmissionServices.createSubmission(userId, req.body);
 
     sendResponse(res, {
         success: true,
@@ -26,7 +26,20 @@ const createSubmission = catchAsync(async (req: Request, res: Response) => {
     });
 })
 
+const getMySubmissions = catchAsync(async (req: Request, res: Response) => {
+    const userId = req.user?.userId as string;
+    const result = await SubmissionServices.getMySubmissions(userId);
+
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: "Your submissions retrieved successfully",
+        data: result,
+    });
+})
+
 
 export const SubmissionController = {
     createSubmission,
+    getMySubmissions,
 }
