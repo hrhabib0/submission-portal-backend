@@ -99,7 +99,7 @@ const getAllSubmissions = async (query: ISubmissionListQuery) => {
         prisma.submission.count({ where }),
     ]);
     return {
-        data: submissions,
+        submissions,
         meta: {
             page,
             limit,
@@ -108,6 +108,41 @@ const getAllSubmissions = async (query: ISubmissionListQuery) => {
         },
     };
 };
+
+const getSubmissionById = async (submissionId: string) => {
+    if (!submissionId) {
+        throw new AppError(httpStatus.BAD_REQUEST, "Submission ID is missing.")
+    }
+    const submission = await prisma.submission.findUnique({
+        where: {
+            id: submissionId,
+        },
+        include: {
+            student: {
+                select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                },
+            },
+            feedback: {
+                orderBy: { createdAt: "desc" },
+                select: {
+                    id: true,
+                    comment: true,
+                    createdAt: true,
+                    mentor: {
+                        select: {
+                            id: true,
+                            name: true,
+                        },
+                    },
+                },
+            },
+        },
+    });
+    return { submission };
+}
 
 const getMySubmissions = async (studentId: string) => {
     const submissions = await prisma.submission.findMany({
@@ -139,7 +174,7 @@ const getMySubmissions = async (studentId: string) => {
         );
     }
 
-    return { submissions };
+    return submissions;
 };
 
 const reviewSubmission = async (
@@ -256,6 +291,7 @@ const getSubmissionStats = async () => {
 export const SubmissionServices = {
     createSubmission,
     getAllSubmissions,
+    getSubmissionById,
     getMySubmissions,
     reviewSubmission,
     getSubmissionStats,
